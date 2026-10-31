@@ -11,14 +11,12 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      
       - uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.7
-      - name: Uygulamayi olustur ve derle
+      - name: Derle
         run: |
-          yes | sdkmanager "platforms;android-34" "build-tools;34.0.0" > /dev/null || true
-          mkdir -p app/src/main/java/com/namaz/vakit
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" > /dev/null || true
           cat > settings.gradle.kts <<'EOF'
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositories { google(); mavenCentral() } }
@@ -71,20 +69,9 @@ jobs:
               </application>
           </manifest>
           EOF
-          cat > app/src/main/java/com/namaz/vakit/Logic.kt <<'EOF'
-          package com.namaz.vakit
-
-          import android.app.*
-          import android.content.*
-          import android.media.AudioAttributes
-          import android.media.RingtoneManager
-          import android.os.Build
-          import java.time.*
-          import kotlin.math.*
-
-          val NAMES = arrayOf("İmsak", "Güneş", "Öğle", "İkindi", "Akşam", "Yatsı")
-          val EMO = arrayOf("🌌", "🌅", "☀️", "🌤️", "🌇", "🌙")
-          val COL = longArrayOf(0xFF5B6BD6, 0xFFF2A33A, 0xFFE3B616, 0xFF3D9AD6, 0xFFE0654F, 0xFF7A4FC2).map { it.toInt() }.toIntArray()
-          class Pl(val n: String, val la: Double, val ln: Double)
-          val PL = ("Ayvacık / Tuzla köyü,39.55,26.17;Adana,37.00,35.32;Adıyaman,37.76,38.28;Afyonkarahisar,38.76,30.54;Ağrı,39.72,43.05;Aksaray,38.37,3
+          gradle assembleDebug --no-daemon --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: namaz-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           
